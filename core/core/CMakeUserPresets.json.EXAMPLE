@@ -1,0 +1,78 @@
+{
+  "version": 2,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 14,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "dev-common",
+      "hidden": true,
+      "inherits": "dev-mode",
+      "cacheVariables": {
+        "CMAKE_PREFIX_PATH": "../build/native/install",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+        "HDF5_USE_STATIC_LIBRARIES": "ON",
+        "ZLIB_USE_STATIC_LIBS": "ON"
+      }
+    },
+    {
+      "name": "dev",
+      "binaryDir": "${sourceDir}/build/dev",
+      "inherits": ["dev-common", "linux", "clang-tidy"],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "dev-coverage",
+      "binaryDir": "${sourceDir}/build/coverage",
+      "inherits": ["dev-common", "coverage-linux"],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Coverage"
+      }
+    },
+    {
+      "name": "dev-sanitize",
+      "binaryDir": "${sourceDir}/build/sanitize",
+      "inherits": ["dev-common", "sanitize-linux"],
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Sanitize"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "dev",
+      "configurePreset": "dev",
+      "configuration": "Debug",
+      "jobs": 8
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "dev-coverage",
+      "configurePreset": "dev-coverage",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "jobs": 8,
+        "noTestsAction": "error"
+      }
+    },
+    {
+      "name": "dev-sanitize",
+      "configurePreset": "dev-sanitize",
+      "output": {
+        "outputOnFailure": true
+      },
+      "execution": {
+        "jobs": 8,
+        "noTestsAction": "error"
+      }
+    }
+  ]
+}

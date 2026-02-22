@@ -1,0 +1,6 @@
+[submodule "core/3rd-party/zlib"]
+	path = core/3rd-party/zlib
+	url = https://github.com/madler/zlib.git
+[submodule "core/3rd-party/hdf5"]
+	path = core/3rd-party/hdf5
+	url = https://github.com/HDFGroup/hdf5.git

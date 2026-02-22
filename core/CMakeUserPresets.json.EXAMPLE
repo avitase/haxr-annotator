@@ -1,0 +1,42 @@
+{
+  "version": 2,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 14,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "emscripten-common",
+      "hidden": true,
+      "generator": "Unix Makefiles",
+      "binaryDir": "${sourceDir}/build/emscripten",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_TOOLCHAIN_FILE": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
+      }
+    },
+    {
+      "name": "emscripten",
+      "inherits": "emscripten-common"
+    },
+    {
+      "name": "native",
+      "generator": "Unix Makefiles",
+      "binaryDir": "${sourceDir}/build/native"
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "emscripten",
+      "configurePreset": "emscripten",
+      "jobs": 8
+    },
+    {
+      "name": "native",
+      "configurePreset": "native",
+      "configuration": "Release",
+      "jobs": 8
+    }
+  ]
+}
