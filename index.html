@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>HAXR HDF5 PoC</title>
+        <style>
+            :root {
+                color-scheme: light;
+            }
+            body {
+                margin: 0;
+                font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+                background: #f6f4ef;
+                color: #1f1f1f;
+            }
+            .wrap {
+                max-width: 900px;
+                margin: 40px auto;
+                padding: 0 16px 48px;
+            }
+            h1 {
+                font-size: 28px;
+                margin: 0 0 12px;
+            }
+            .drop {
+                border: 2px dashed #b09a78;
+                border-radius: 12px;
+                padding: 28px;
+                background: #fff7e8;
+                text-align: center;
+                transition: background 120ms ease, border-color 120ms ease;
+            }
+            .drop.dragover {
+                background: #ffe7c2;
+                border-color: #7a5c2e;
+            }
+            .row {
+                display: flex;
+                gap: 12px;
+                margin-top: 12px;
+                flex-wrap: wrap;
+            }
+            button {
+                background: #2b1f10;
+                color: #fff;
+                border: 0;
+                padding: 10px 14px;
+                border-radius: 8px;
+                cursor: pointer;
+            }
+            button[disabled] {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+            .log {
+                margin-top: 16px;
+                font-size: 13px;
+                white-space: pre-wrap;
+                background: #1f1f1f;
+                color: #f5f5f5;
+                padding: 12px;
+                border-radius: 8px;
+                min-height: 120px;
+            }
+            .hint {
+                font-size: 13px;
+                color: #4b4234;
+            }
+            input[type="file"] {
+                display: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrap">
+            <h1>HDF5 PoC: Drop, Modify, Download</h1>
+            <p class="hint">Drag and drop a .hdf5 file. The WASM core adds a root attribute and returns the updated file.</p>
+            <div id="drop" class="drop">
+                <strong>Drop .hdf5 here</strong>
+                <div class="row" style="justify-content:center;">
+                    <button id="pick">Choose File</button>
+                    <input id="fileInput" type="file" accept=".hdf5,.h5" />
+                </div>
+            </div>
+            <div class="row">
+                <button id="download" disabled>Download Modified File</button>
+            </div>
+            <div id="log" class="log">Waiting for WASM…</div>
+        </div>
+
+        <script>
+            const WASM_JS = "core.js";
+
+            const logEl = document.getElementById("log");
+            const dropEl = document.getElementById("drop");
+            const pickEl = document.getElementById("pick");
+            const fileInput = document.getElementById("fileInput");
+            const downloadBtn = document.getElementById("download");
+
+            let lastOutput = null;
+
+            function log(msg) {
+                logEl.textContent += "\n" + msg;
+            }
+
+            function setReady() {
+                logEl.textContent = "WASM ready. Drop a file to process.";
+            }
+
+            function downloadBytes(bytes, filename) {
+                const blob = new Blob([bytes], { type: "application/octet-stream" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+            }
+
+            function handleFile(file) {
+                if (!file) return;
+                logEl.textContent = "";
+                log(`Received: ${file.name} (${file.size} bytes)`);
+
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const inputPath = "/input.hdf5";
+                    const outputPath = "/output.hdf5";
+
+                    const data = new Uint8Array(reader.result);
+                    if (!window.wasmModule) {
+                        log("WASM not ready yet.");
+                        return;
+                    }
+
+                    window.wasmModule.FS.writeFile(inputPath, data);
+
+                    const rc = window.wasmModule.ccall(
+                        "haxr_tag_hdf5",
+                        "number",
+                        ["string", "string"],
+                        [inputPath, outputPath]
+                    );
+
+                    if (rc !== 0) {
+                        log(`Error: haxr_tag_hdf5 returned ${rc}`);
+                        return;
+                    }
+
+                    const out = window.wasmModule.FS.readFile(outputPath);
+                    lastOutput = { name: file.name, data: out };
+                    downloadBtn.disabled = false;
+                    log(`OK: wrote ${out.length} bytes`);
+                };
+                reader.onerror = () => log("Failed to read file");
+                reader.readAsArrayBuffer(file);
+            }
+
+            dropEl.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                dropEl.classList.add("dragover");
+            });
+            dropEl.addEventListener("dragleave", () => dropEl.classList.remove("dragover"));
+            dropEl.addEventListener("drop", (e) => {
+                e.preventDefault();
+                dropEl.classList.remove("dragover");
+                const file = e.dataTransfer.files[0];
+                handleFile(file);
+            });
+
+            pickEl.addEventListener("click", () => fileInput.click());
+            fileInput.addEventListener("change", () => handleFile(fileInput.files[0]));
+
+            downloadBtn.addEventListener("click", () => {
+                if (!lastOutput) return;
+                const name = lastOutput.name.replace(/(\.hdf5|\.h5)?$/i, "-modified.hdf5");
+                downloadBytes(lastOutput.data, name);
+            });
+
+            const script = document.createElement("script");
+            script.src = WASM_JS;
+            script.async = true;
+            script.onload = () => {
+                if (typeof Module === "undefined") {
+                    log("Module factory not found. Ensure core.js exposes Module.");
+                    return;
+                }
+                Module().then((instance) => {
+                    window.wasmModule = instance;
+                    setReady();
+                }).catch((err) => {
+                    log(`Failed to init WASM: ${err}`);
+                });
+            };
+            script.onerror = () => log(`Failed to load ${WASM_JS}`);
+            document.body.appendChild(script);
+        </script>
+    </body>
+</html>

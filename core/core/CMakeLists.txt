@@ -63,10 +63,33 @@ find_package(HDF5 2.0.0 EXACT REQUIRED COMPONENTS C)
 
 target_link_libraries(core_core PRIVATE hdf5::hdf5 ZLIB::ZLIB)
 
-# ---- Install rules ----
+# ---- Optional WASM wrapper (Emscripten only) ----
 
-if(NOT CMAKE_SKIP_INSTALL_RULES)
-  include(cmake/install-rules.cmake)
+option(CORE_BUILD_WASM "Build Emscripten JS/WASM wrapper" OFF)
+
+if(CORE_BUILD_WASM)
+  option(CORE_WASM_OUTPUT_DIR "Output directory for core.js/core.wasm" "")
+
+  add_executable(core_wasm source/wasm_entry.cpp)
+  target_link_libraries(core_wasm PRIVATE core::core)
+  set_target_properties(core_wasm PROPERTIES OUTPUT_NAME core SUFFIX ".js")
+
+  if(CORE_WASM_OUTPUT_DIR)
+    set_target_properties(core_wasm PROPERTIES
+      RUNTIME_OUTPUT_DIRECTORY "${CORE_WASM_OUTPUT_DIR}"
+    )
+  endif()
+
+  target_link_options(
+      core_wasm PRIVATE
+      "-sEXPORTED_FUNCTIONS=['_haxr_tag_hdf5']"
+      "-sEXPORTED_RUNTIME_METHODS=['FS','ccall']"
+      "-sENVIRONMENT=web"
+      "-sMODULARIZE=1"
+      "-sEXPORT_NAME=Module"
+      "-sALLOW_MEMORY_GROWTH=1"
+      "-sFORCE_FILESYSTEM=1"
+  )
 endif()
 
 # ---- Developer mode ----

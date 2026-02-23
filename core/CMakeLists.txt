@@ -4,6 +4,8 @@ project(core-superbuild)
 
 include(ExternalProject)
 
+option(CORE_BUILD_WASM "Build Emscripten JS/WASM wrapper" ON)
+
 ExternalProject_Add(
     zlib
     SOURCE_DIR ${CMAKE_CURRENT_LIST_DIR}/3rd-party/zlib
@@ -60,11 +62,19 @@ ExternalProject_Add(
         -DCMAKE_FIND_ROOT_PATH_MODE_PACKAGE=ONLY
         -DCMAKE_FIND_ROOT_PATH_MODE_LIBRARY=ONLY
         -DCMAKE_FIND_ROOT_PATH_MODE_INCLUDE=ONLY
-        -DCMAKE_INSTALL_PREFIX:PATH=<INSTALL_DIR>
         -DCMAKE_PREFIX_PATH:PATH=<INSTALL_DIR>
         -DCMAKE_TOOLCHAIN_FILE:PATH=${CMAKE_TOOLCHAIN_FILE}
-        -DCMAKE_INSTALL_RPATH:STRING=<INSTALL_DIR>/lib
-        -DCMAKE_BUILD_WITH_INSTALL_RPATH=ON
+        -DCORE_BUILD_WASM:BOOL=${CORE_BUILD_WASM}
+        -DCORE_WASM_OUTPUT_DIR:PATH=${CMAKE_CURRENT_BINARY_DIR}/wasm
         -DHDF5_USE_STATIC_LIBRARIES=ON
         -DZLIB_USE_STATIC_LIBS=ON
+    BUILD_COMMAND
+        ${CMAKE_COMMAND} --build <BINARY_DIR>
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_CURRENT_BINARY_DIR}/wasm/core.js
+            ${CMAKE_CURRENT_LIST_DIR}/../core.js
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            ${CMAKE_CURRENT_BINARY_DIR}/wasm/core.wasm
+            ${CMAKE_CURRENT_LIST_DIR}/../core.wasm
+    INSTALL_COMMAND ""
 )

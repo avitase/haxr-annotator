@@ -12,13 +12,18 @@
       "binaryDir": "${sourceDir}/build/emscripten",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
-        "CMAKE_TOOLCHAIN_FILE": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
+        "CMAKE_TOOLCHAIN_FILE": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake",
+        "CORE_BUILD_WASM": "ON"
       }
     },
     {
       "name": "native",
       "generator": "Unix Makefiles",
-      "binaryDir": "${sourceDir}/build/native"
+      "binaryDir": "${sourceDir}/build/native",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CORE_BUILD_WASM": "OFF"
+      }
     }
   ],
   "buildPresets": [
