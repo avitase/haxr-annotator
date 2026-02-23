@@ -1,14 +1,22 @@
+---
 Checks: "*,\
-  -google-readability-todo,\
   -altera-*,\
+  -boost-use-ranges,\
+  -cppcoreguidelines-*,\
   -fuchsia-*,\
   fuchsia-multiple-inheritance,\
+  -google-readability-todo,\
+  -hicpp-vararg,\
   -llvm-header-guard,\
   -llvm-include-order,\
   -llvmlibc-*,\
   -modernize-use-nodiscard,\
-  -misc-non-private-member-variables-in-classes"
-WarningsAsErrors: ''
+  -modernize-use-ranges,\
+  -modernize-use-trailing-return-type,\
+  -misc-non-private-member-variables-in-classes,\
+  -readability-identifier-length,\
+  -readability-magic-numbers"
+WarningsAsErrors: '*'
 CheckOptions:
   - key: 'bugprone-argument-comment.StrictMode'
     value: 'true'
@@ -41,11 +49,11 @@ CheckOptions:
   - key: 'readability-redundant-access-specifiers.CheckFirstDeclaration'
     value: 'true'
   - key: 'readability-identifier-naming.AbstractClassCase'
-    value: 'lower_case'
+    value: 'CamelCase'
   - key: 'readability-identifier-naming.ClassCase'
-    value: 'lower_case'
+    value: 'CamelCase'
   - key: 'readability-identifier-naming.ClassConstantCase'
-    value: 'lower_case'
+    value: 'CamelCase'
   - key: 'readability-identifier-naming.ClassMemberCase'
     value: 'lower_case'
   - key: 'readability-identifier-naming.ClassMethodCase'
@@ -65,7 +73,7 @@ CheckOptions:
   - key: 'readability-identifier-naming.ConstexprVariableCase'
     value: 'lower_case'
   - key: 'readability-identifier-naming.EnumCase'
-    value: 'lower_case'
+    value: 'CamelCase'
   - key: 'readability-identifier-naming.EnumConstantCase'
     value: 'lower_case'
   - key: 'readability-identifier-naming.FunctionCase'
@@ -127,13 +135,13 @@ CheckOptions:
   - key: 'readability-identifier-naming.StaticVariableCase'
     value: 'lower_case'
   - key: 'readability-identifier-naming.StructCase'
-    value: 'lower_case'
+    value: 'CamelCase'
   - key: 'readability-identifier-naming.TemplateParameterCase'
     value: 'CamelCase'
   - key: 'readability-identifier-naming.TemplateTemplateParameterCase'
     value: 'CamelCase'
   - key: 'readability-identifier-naming.TypeAliasCase'
-    value: 'lower_case'
+    value: 'CamelCase'
   - key: 'readability-identifier-naming.TypedefCase'
     value: 'lower_case'
   - key: 'readability-identifier-naming.TypeTemplateParameterCase'

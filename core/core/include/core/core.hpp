@@ -1,16 +1,10 @@
 #pragma once
 
-#include <string>
+#include <cstdint>
 
 #include "core/core_export.hpp"
 
-class CORE_EXPORT exported_class
+extern "C"
 {
-public:
-  exported_class();
-
-  auto name() const -> char const*;
-
-private:
-  std::string m_name;
-};
+CORE_EXPORT [[nodiscard]] int32_t f(int32_t /*x*/);
+}  // extern "C"

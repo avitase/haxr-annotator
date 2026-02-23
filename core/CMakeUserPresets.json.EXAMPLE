@@ -7,18 +7,13 @@
   },
   "configurePresets": [
     {
-      "name": "emscripten-common",
-      "hidden": true,
+      "name": "emscripten",
       "generator": "Unix Makefiles",
       "binaryDir": "${sourceDir}/build/emscripten",
       "cacheVariables": {
         "CMAKE_BUILD_TYPE": "Release",
         "CMAKE_TOOLCHAIN_FILE": "$env{EMSDK}/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
       }
-    },
-    {
-      "name": "emscripten",
-      "inherits": "emscripten-common"
     },
     {
       "name": "native",

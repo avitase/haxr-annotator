@@ -1,13 +1,11 @@
-#include <string>
+#include <cstdint>
 
 #include "core/core.hpp"
 
-exported_class::exported_class()
-    : m_name {"core"}
+extern "C"
 {
-}
-
-auto exported_class::name() const -> char const*
+int32_t f(int32_t x)
 {
-  return m_name.c_str();
+    return -x;
 }
+}  // extern "C"
