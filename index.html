@@ -127,8 +127,7 @@
 
                 const reader = new FileReader();
                 reader.onload = () => {
-                    const inputPath = "/input.hdf5";
-                    const outputPath = "/output.hdf5";
+                    const path = "/input.hdf5";
 
                     const data = new Uint8Array(reader.result);
                     if (!window.wasmModule) {
@@ -136,13 +135,13 @@
                         return;
                     }
 
-                    window.wasmModule.FS.writeFile(inputPath, data);
+                    window.wasmModule.FS.writeFile(path, data);
 
                     const rc = window.wasmModule.ccall(
                         "haxr_tag_hdf5",
                         "number",
                         ["string", "string"],
-                        [inputPath, outputPath]
+                        [path, path]
                     );
 
                     if (rc !== 0) {
@@ -150,7 +149,7 @@
                         return;
                     }
 
-                    const out = window.wasmModule.FS.readFile(outputPath);
+                    const out = window.wasmModule.FS.readFile(path);
                     lastOutput = { name: file.name, data: out };
                     downloadBtn.disabled = false;
                     log(`OK: wrote ${out.length} bytes`);

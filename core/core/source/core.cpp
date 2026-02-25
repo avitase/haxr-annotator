@@ -1,7 +1,5 @@
 #include <cstdint>
 #include <cstring>
-#include <filesystem>
-#include <system_error>
 
 #include "core/core.hpp"
 
@@ -18,16 +16,6 @@ namespace
 {
 constexpr const char* attr_name = "haxr_poc";
 constexpr const char* g = "modified_by_core";
-
-bool paths_equal(const char* a, const char* b)
-{
-    if (a == nullptr || b == nullptr)
-    {
-        return false;
-    }
-
-    return std::strcmp(a, b) == 0;
-}
 
 int32_t write_root_attribute(hid_t file_id)
 {
@@ -97,19 +85,6 @@ int32_t haxr_tag_hdf5(const char* input_path, const char* output_path)
     if (input_path == nullptr || output_path == nullptr)
     {
         return -1;
-    }
-
-    std::error_code copy_ec;
-    if (!paths_equal(input_path, output_path))
-    {
-        std::filesystem::copy_file(input_path,
-                                   output_path,
-                                   std::filesystem::copy_options::overwrite_existing,
-                                   copy_ec);
-        if (copy_ec)
-        {
-            return -2;
-        }
     }
 
     const hid_t file_id = H5Fopen(output_path, H5F_ACC_RDWR, H5P_DEFAULT);

@@ -70,11 +70,19 @@ ExternalProject_Add(
         -DZLIB_USE_STATIC_LIBS=ON
     BUILD_COMMAND
         ${CMAKE_COMMAND} --build <BINARY_DIR>
+    INSTALL_COMMAND ""
+)
+
+if(CORE_BUILD_WASM)
+    ExternalProject_Add_Step(
+        core
+        copy_wasm
+        DEPENDEES build
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${CMAKE_CURRENT_BINARY_DIR}/wasm/core.js
             ${CMAKE_CURRENT_LIST_DIR}/../core.js
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
             ${CMAKE_CURRENT_BINARY_DIR}/wasm/core.wasm
             ${CMAKE_CURRENT_LIST_DIR}/../core.wasm
-    INSTALL_COMMAND ""
-)
+    )
+endif()
