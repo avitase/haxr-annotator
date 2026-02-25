@@ -127,29 +127,39 @@
 
                 const reader = new FileReader();
                 reader.onload = () => {
-                    const path = "/input.hdf5";
-
                     const data = new Uint8Array(reader.result);
                     if (!window.wasmModule) {
                         log("WASM not ready yet.");
                         return;
                     }
 
-                    window.wasmModule.FS.writeFile(path, data);
+                    const mod = window.wasmModule;
+                    const inPtr = mod._malloc(data.length);
+                    if (!inPtr) {
+                        log("Failed to allocate input buffer.");
+                        return;
+                    }
+                    mod.HEAPU8.set(data, inPtr);
 
-                    const rc = window.wasmModule.ccall(
-                        "haxr_tag_hdf5",
-                        "number",
-                        ["string", "string"],
-                        [path, path]
-                    );
+                    const rc = mod._haxr_tag_hdf5_image(inPtr, data.length);
+                    mod._free(inPtr);
 
                     if (rc !== 0) {
-                        log(`Error: haxr_tag_hdf5 returned ${rc}`);
+                        log(`Error: haxr_tag_hdf5_image returned ${rc}`);
                         return;
                     }
 
-                    const out = window.wasmModule.FS.readFile(path);
+                    const outPtr = mod._haxr_get_output_ptr();
+                    const outSize = mod._haxr_get_output_size();
+
+                    if (!outPtr || !outSize) {
+                        log("No output returned from WASM.");
+                        return;
+                    }
+
+                    const out = mod.HEAPU8.slice(outPtr, outPtr + outSize);
+                    mod._haxr_clear_output();
+
                     lastOutput = { name: file.name, data: out };
                     downloadBtn.disabled = false;
                     log(`OK: wrote ${out.length} bytes`);
