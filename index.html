@@ -142,7 +142,6 @@
                     mod.HEAPU8.set(data, inPtr);
 
                     const rc = mod._haxr_tag_hdf5_image(inPtr, data.length);
-                    mod._free(inPtr);
 
                     if (rc !== 0) {
                         log(`Error: haxr_tag_hdf5_image returned ${rc}`);
