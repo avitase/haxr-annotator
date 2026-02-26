@@ -157,7 +157,6 @@
                     }
 
                     const out = mod.HEAPU8.slice(outPtr, outPtr + outSize);
-                    mod._haxr_clear_output();
 
                     lastOutput = { name: file.name, data: out };
                     downloadBtn.disabled = false;

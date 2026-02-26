@@ -82,7 +82,7 @@ if(CORE_BUILD_WASM)
 
   target_link_options(
       core_wasm PRIVATE
-      "-sEXPORTED_FUNCTIONS=['_haxr_tag_hdf5_image','_haxr_get_output_ptr','_haxr_get_output_size','_haxr_clear_output','_malloc','_free']"
+      "-sEXPORTED_FUNCTIONS=['_haxr_tag_hdf5_image','_haxr_get_output_ptr','_haxr_get_output_size','_malloc','_free']"
       "-sEXPORTED_RUNTIME_METHODS=['HEAPU8','HEAPU32']"
       "-sENVIRONMENT=web"
       "-sMODULARIZE=1"

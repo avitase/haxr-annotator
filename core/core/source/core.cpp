@@ -149,7 +149,7 @@ int32_t haxr_tag_hdf5_image(uint8_t *input_data, size_t input_size)
     return 0;
 }
 
-uint8_t *haxr_get_output_ptr()
+const uint8_t *haxr_get_output_ptr()
 {
     return last_output;
 }
@@ -157,12 +157,5 @@ uint8_t *haxr_get_output_ptr()
 size_t haxr_get_output_size()
 {
     return last_output_size;
-}
-
-void haxr_clear_output()
-{
-    delete[] last_output;
-    last_output = nullptr;
-    last_output_size = 0;
 }
 }  // extern "C"
